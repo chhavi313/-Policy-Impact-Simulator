@@ -3,6 +3,7 @@ import os
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
+import pandas as pd
 from dotenv import load_dotenv
 
 from population import generate_population
@@ -16,8 +17,8 @@ GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
 st.set_page_config(
     page_title="Policy Impact Simulator",
-    page_icon="🗳️",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
 CREAM = "#0A0E1A"         
@@ -40,8 +41,6 @@ RED = "#F87171"
 ORANGE = "#FB923C"        
 
 EMPLOYMENT_COLORS = {"Unemployed": CORAL, "Salaried": VIOLET, "Business Owner": SKY}
-EMPLOYMENT_ICONS = {"Unemployed": "◇", "Salaried": "◆", "Business Owner": "▲"}
-EMPLOYMENT_EMOJI = {"Unemployed": "🔍", "Salaried": "💼", "Business Owner": "🏬"}
 INCOME_DOTS = {"Poor": "$", "Middle Class": "$$", "Wealthy": "$$$"}
 
 EXAMPLE_POLICIES = {
@@ -171,12 +170,8 @@ SPARK_VIOLET = (f'<svg width="14" height="14" viewBox="0 0 14 14">'
                 f'<line x1="7" y1="1" x2="7" y2="13"/><line x1="1" y1="7" x2="13" y2="7"/></g></svg>')
 
 
-def persona_badge(status, size=26):
-    color = EMPLOYMENT_COLORS.get(status, MUTED)
-    glyph = EMPLOYMENT_ICONS.get(status, "•")
-    return (f'<span class="mono" style="display:inline-flex;align-items:center;justify-content:center;'
-            f'width:{size}px;height:{size}px;min-width:{size}px;border-radius:50%;background:{color};'
-            f'color:#fff;font-size:{size * 0.5:.0f}px;line-height:1;">{glyph}</span>')
+def persona_badge(status):
+    return f'<span class="persona-badge">{status}</span>'
 
 
 def mood_face(vcolor, mood, size=64):
@@ -237,25 +232,8 @@ h1, h2, h3 {{ font-family: 'Fredoka', sans-serif !important; }}
    newer ones) so both are targeted here, with high z-index so nothing else
    on the page (like the background blobs) can sit on top of it. */
 header {{ background: transparent !important; }}
-header [data-testid="stToolbar"] {{ visibility: hidden; }}
-[data-testid="collapsedControl"],
-[data-testid="stSidebarCollapsedControl"] {{
-    visibility: visible !important;
-    display: flex !important;
-    opacity: 1 !important;
-    position: relative !important;
-    z-index: 999999 !important;
-    pointer-events: auto !important;
-}}
-[data-testid="collapsedControl"] *,
-[data-testid="stSidebarCollapsedControl"] * {{
-    visibility: visible !important;
-    opacity: 1 !important;
-}}
-[data-testid="collapsedControl"] svg,
-[data-testid="stSidebarCollapsedControl"] svg {{
-    fill: {INK} !important; stroke: {INK} !important;
-}}
+
+
 .stApp {{ background: {CREAM}; }}
 .block-container {{ padding-top: 1.4rem; max-width: 1200px; }}
 
@@ -425,9 +403,7 @@ if not GEMINI_API_KEY:
         "in this folder (see `.env.example`), then restart the app."
     )
 
-
 with st.sidebar:
-    st.markdown(f'<div class="section-eyebrow" style="color:{VIOLET};">⚙ CONFIG</div>', unsafe_allow_html=True)
     st.markdown("### Simulation Settings")
     population_size = st.slider("Population size (simulated)", 1_000, 1_000_000, 50_000, step=1_000)
     max_segments = st.slider(
@@ -436,14 +412,60 @@ with st.sidebar:
         help="The population is modeled as this many representative demographic segments, "
              "each getting one AI-generated reaction, weighted by population share.",
     )
+    if st.session_state.active_sim_index is not None and st.session_state.simulations:
+
+            active_sim = st.session_state.simulations[
+                st.session_state.active_sim_index
+            ]
+
+            st.markdown("### Review")
+
+            status_options = [
+                "Draft",
+                "Needs Review",
+                "Verified",
+                "Rejected"
+            ]
+
+            current_status = active_sim.get("status", "Draft")
+
+            new_status = st.selectbox(
+                "Status",
+                status_options,
+                index=status_options.index(current_status),
+                key=f"review_status_{st.session_state.active_sim_index}"
+            )
+
+            current_notes = active_sim.get("reviewer_notes", "")
+
+            new_notes = st.text_area(
+                "Reviewer Notes",
+                value=current_notes,
+                placeholder="Add notes about this simulation...",
+                key=f"review_notes_{st.session_state.active_sim_index}"
+            )
+
+            if st.button(
+                "Save Review",
+                key=f"save_review_{st.session_state.active_sim_index}"
+            ):
+                active_sim["status"] = new_status
+                active_sim["reviewer_notes"] = new_notes
+
+                st.success("Review saved!")
+                st.rerun()
+
+    
 
     st.divider()
     if st.session_state.simulations:
-        st.markdown(f'<div class="section-eyebrow" style="color:{PINK};">🕘 HISTORY</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="section-eyebrow" style="color:{PINK};">HISTORY</div>', unsafe_allow_html=True)
         st.markdown("### Past Runs")
         labels = [s["label"] for s in st.session_state.simulations]
         chosen = st.radio("View a run:", labels, index=len(labels) - 1, label_visibility="collapsed")
         st.session_state.active_sim_index = labels.index(chosen)
+
+    
 
 
 section("INPUT", "Define the Policy", "Pick an example to start fast, or write your own from scratch.",
@@ -513,26 +535,43 @@ if run_clicked:
         aggregated = aggregate_results(results)
         label = f"#{len(st.session_state.simulations) + 1}: {policy_text[:40]}{'...' if len(policy_text) > 40 else ''}"
         st.session_state.simulations.append({
-            "label": label, "policy_text": policy_text, "population_size": population_size,
-            "results": results, "aggregated": aggregated,
-        })
+            "label": label,"policy_text": policy_text,"population_size": population_size,"results": results,"aggregated": aggregated,"status": "Draft",
+        "reviewer_notes": "",})
         st.session_state.active_sim_index = len(st.session_state.simulations) - 1
         st.rerun()
 
 if st.session_state.active_sim_index is not None and st.session_state.simulations:
-    sim = st.session_state.simulations[st.session_state.active_sim_index]
-    agg = sim["aggregated"]
-    seg_df = agg["segment_df"]
-    support = agg["overall_support"]
-    sentiment = agg["overall_sentiment"]
 
-    section("RESULTS", "Simulation Report", "Here's how your synthetic population reacted.",
-            icon_fn=icon_notes, accent=VIOLET)
-    st.markdown(
-        f'<div style="color:{MUTED}; font-size:0.92rem; margin-bottom:18px;">'
-        f'<span class="mono" style="color:{INK}; font-weight:600;">POLICY —</span> {sim["policy_text"]}</div>',
-        unsafe_allow_html=True,
-    )
+    sim = st.session_state.simulations[
+        st.session_state.active_sim_index
+    ]
+
+    agg = sim["aggregated"]
+
+    results = sim["results"]
+
+    if results:
+        total_weight = sum(r.get("weight", 0) for r in results)
+
+        if total_weight > 0:
+            support = sum(
+                r.get("support_pct", 50) * r.get("weight", 0)
+                for r in results
+            ) / total_weight
+
+            sentiment = sum(
+                r.get("sentiment_score", 0) * r.get("weight", 0)
+                for r in results
+            ) / total_weight
+        else:
+            support = 50
+            sentiment = 0
+    else:
+        support = 50
+        sentiment = 0
+    current_status = sim.get("status", "Draft")
+    seg_df = pd.DataFrame(sim["results"])
+    current_notes = sim.get("reviewer_notes", "")
 
 
     if support >= 65:
@@ -689,11 +728,9 @@ if st.session_state.active_sim_index is not None and st.session_state.simulation
 
     for _, row in seg_df.iterrows():
         color = support_color(row["support_pct"])
-        emoji = EMPLOYMENT_EMOJI.get(row["employment_status"], "🔹")
         with st.expander(
-            f"{row['label']}   ·   {row['support_pct']}% support   ·   {row['count']:,} people ({row['weight'] * 100:.1f}%)",
-            icon=emoji,
-        ):
+        f"{row['label']}   ·   {row['support_pct']}% support   ·   {row['count']:,} people ({row['weight'] * 100:.1f}%)"
+    ):
             st.markdown(
                 f'<span class="pill" style="background:{color}22; color:{color};">{row["support_pct"]}% SUPPORT</span>'
                 f'<span class="pill" style="background:{SKY}22; color:{SKY};">SENTIMENT {row["sentiment_score"]:+.2f}</span>',
