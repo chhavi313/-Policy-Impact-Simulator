@@ -243,10 +243,8 @@ header {{ background: transparent !important; }}
     .hero-illustration {{ animation: none !important; }}
 }}
 
-/* --- ambient background blobs --- */
 .bg-blob {{ position: fixed; border-radius: 50%; filter: blur(90px); pointer-events: none; z-index: -1; }}
 
-/* --- hero --- */
 .hero-card {{
     position: relative; z-index: 1;
     background: linear-gradient(135deg, {PAPER} 0%, {VIOLET_SOFT} 130%);
@@ -266,7 +264,6 @@ header {{ background: transparent !important; }}
 .hero-illustration {{ position: relative; width: 210px; height: 150px; flex: none; animation: floaty 4.5s ease-in-out infinite; }}
 @media (max-width: 900px) {{ .hero-illustration {{ display: none; }} }}
 
-/* --- section headers --- */
 .section-head {{ margin: 36px 0 16px 0; position: relative; z-index: 1; }}
 .section-head-row {{ display: flex; align-items: center; gap: 12px; }}
 .section-icon {{ width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex: none; }}
@@ -274,7 +271,6 @@ header {{ background: transparent !important; }}
 .section-title {{ font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 1.32rem; color: {INK}; }}
 .section-caption {{ font-size: 0.86rem; color: {MUTED}; margin-top: 5px; margin-left: 48px; }}
 
-/* --- KPI cards --- */
 .kpi-card {{
     background: {PAPER}; border: 1px solid {BORDER}; border-radius: 20px;
     padding: 18px 20px; min-height: 108px; position: relative; overflow: hidden;
@@ -285,7 +281,6 @@ header {{ background: transparent !important; }}
 .kpi-label {{ font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.07em; text-transform: uppercase; color: {MUTED}; margin-top: 8px; }}
 .kpi-icon {{ position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }}
 
-/* --- verdict banner --- */
 .verdict {{
     position: relative; overflow: hidden; border-radius: 24px; padding: 26px 30px; margin: 6px 0 28px 0;
     background: linear-gradient(120deg, var(--vtint) 0%, {PAPER} 78%);
@@ -298,7 +293,6 @@ header {{ background: transparent !important; }}
 .verdict-pct {{ font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 2.6rem; color: var(--vcolor); margin-left: auto; }}
 .confetti {{ position: absolute; border-radius: 50%; opacity: 0.55; }}
 
-/* --- winners / losers panel --- */
 .rank-panel {{ background: {PAPER}; border: 1px solid {BORDER}; border-radius: 20px; padding: 18px 20px; min-height: 200px; box-shadow: 0 10px 26px -18px {SHADOW}AA; }}
 .rank-panel-title {{ font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }}
 .rank-row {{ display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed {BORDER}; gap: 10px; }}
@@ -308,13 +302,10 @@ header {{ background: transparent !important; }}
 .rank-meta {{ font-size: 0.72rem; color: {MUTED}; }}
 .rank-pct {{ font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.98rem; flex: none; }}
 
-/* --- segment cards / pills --- */
 .pill {{ display: inline-block; padding: 4px 12px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; margin-right: 8px; }}
 
-/* --- live sim dots --- */
 .pulse-dot {{ display: inline-block; width: 13px; height: 13px; border-radius: 50%; margin: 3px; box-shadow: 0 0 0 3px {CREAM}, 0 2px 6px -2px {SHADOW}CC; }}
 
-/* --- buttons --- */
 div.stButton > button {{
     border-radius: 999px !important; font-family: 'Fredoka', sans-serif !important; font-weight: 600 !important;
     padding: 0.6rem 1.7rem !important; border: none !important;
@@ -324,7 +315,6 @@ div.stButton > button {{
 div.stButton > button:hover {{ transform: translateY(-2px); box-shadow: 0 16px 32px -12px {VIOLET} !important; }}
 div.stButton > button:disabled {{ background: {BORDER} !important; color: {MUTED} !important; box-shadow: none !important; }}
 
-/* --- inputs --- */
 .stTextArea textarea, .stSelectbox div[data-baseweb="select"] > div {{
     border-radius: 16px !important; border: 1.5px solid {BORDER} !important; background: {PAPER} !important;
     color: {INK} !important;
@@ -332,11 +322,9 @@ div.stButton > button:disabled {{ background: {BORDER} !important; color: {MUTED
 .stTextArea textarea::placeholder {{ color: {MUTED} !important; opacity: 1; }}
 .stTextArea textarea:focus {{ border-color: {VIOLET} !important; box-shadow: 0 0 0 3px {VIOLET_SOFT} !important; }}
 
-/* --- alerts / charts / expanders --- */
 .stAlert {{ border-radius: 16px !important; }}
 div[data-testid="stPlotlyChart"] {{ background: {PAPER}; border: 1px solid {BORDER}; border-radius: 20px; padding: 12px; box-shadow: 0 10px 26px -18px {SHADOW}AA; }}
 div[data-testid="stExpander"] {{ border: 1px solid {BORDER} !important; border-radius: 16px !important; background: {PAPER} !important; margin-bottom: 10px; overflow: hidden; }}
-/* --- sidebar --- */
 section[data-testid="stSidebar"] {{
     background: {PAPER_TINT}; border-right: 1px solid {BORDER};
 }}
@@ -359,7 +347,6 @@ section[data-testid="stSidebar"] div[role="radiogroup"] label {{
 section[data-testid="stSidebar"] div[role="radiogroup"] label:hover {{ border-color: {VIOLET}88; }}
 section[data-testid="stSidebar"] div[role="radiogroup"] p {{ color: {INK} !important; font-size: 0.83rem !important; }}
 
-/* --- empty state --- */
 .empty-card {{ background: {PAPER}; border: 1.5px dashed {BORDER}; border-radius: 22px; padding: 44px 30px; text-align: center; margin-top: 12px; }}
 .empty-title {{ font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 1.18rem; color: {INK}; margin-top: 16px; }}
 .empty-sub {{ font-size: 0.9rem; color: {MUTED}; margin-top: 6px; }}
@@ -721,7 +708,6 @@ if st.session_state.active_sim_index is not None and st.session_state.simulation
         fig_hist.update_yaxes(gridcolor=BORDER)
         st.plotly_chart(fig_hist, width="stretch")
 
-    # --- Segment detail ---
     section("DETAIL", "Segment-by-Segment",
             "Each card is one representative slice of the population, weighted by its share of the total.",
             icon_fn=icon_notes, accent=PINK)
